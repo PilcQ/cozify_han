@@ -86,3 +86,17 @@ class CozifyArraySensor(CoordinatorEntity, SensorEntity):
         if len(arr) > self._index:
             return float(arr[self._index])
         return 0
+# sensor.py (alkuosa säilyy samana kuin aiemmin)
+
+async def async_setup_entry(hass, entry, async_add_entities):
+    """Aseta sensorit Config Entryn perusteella."""
+    config = entry.data
+    host = config[CONF_HOST]
+    url = f"http://{host}/meter"
+
+    # Tähän tulee sama Coordinator-logiikka kuin aiemmin viestissäni
+    # Mutta se käyttää nyt tätä dynaamista URL-osoitetta
+    
+    # ... (coordinator-koodi) ...
+    
+    # async_add_entities(sensors)
