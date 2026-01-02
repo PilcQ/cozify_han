@@ -24,8 +24,11 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Aseta sensorit (YAML-konfiguraation kautta tai integraationa)."""
     
-    # Huom: IP-osoite kannattaa siirtää konfiguraatioon
-    url = "http://192.168.1.10/meter" [cite: 26]
+    # Haetaan IP-osoite konfiguraatiosta
+    host = config.get(CONF_HOST)
+    
+    # Muodostetaan URL dynaamisesti (alkuperäinen polku oli /meter) 
+    url = f"http://{host}/meter"
 
     async def async_update_data():
         async with aiohttp.ClientSession() as session:
