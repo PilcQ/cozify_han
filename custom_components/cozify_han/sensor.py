@@ -86,13 +86,4 @@ class CozifyArraySensor(CoordinatorEntity, SensorEntity):
         if len(arr) > self._index:
             return float(arr[self._index])
         return 0
-# sensor.py (alkuosa säilyy samana kuin aiemmin)
 
-
-
-    # Tähän tulee sama Coordinator-logiikka kuin aiemmin viestissäni
-    # Mutta se käyttää nyt tätä dynaamista URL-osoitetta
-    
-    # ... (coordinator-koodi) ...
-    
-    # async_add_entities(sensors)
