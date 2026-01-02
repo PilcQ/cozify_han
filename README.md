@@ -17,13 +17,13 @@ Tämä integraatio tuo Cozify HAN -lukijan sähkömittaustiedot suoraan Home Ass
 2. Klikkaa kolmea pistettä oikeassa yläkulmassa ja valitse **Custom repositories**.
 3. Lisää tämän repositorion osoite: `https://github.com/pilcq/cozify_han`
 4. Valitse kategoriaksi **Integration** ja klikkaa **Add**.
-5. Etsi "Cozify HAN Bridge" listalta ja klikkaa **Download**.
+5. Etsi "Cozify HAN" listalta ja klikkaa **Download**.
 6. **Käynnistä Home Assistant uudelleen.**
 
 ### Vaihe 2: Integraation käyttöönotto
 1. Mene **Asetukset** -> **Laitteet ja palvelut**.
 2. Klikkaa **Lisää integraatio**.
-3. Etsi "Cozify HAN Bridge".
+3. Etsi "Cozify HAN".
 4. Syötä laitteesi **IP-osoite** (esim. `192.168.1.10`) ja klikkaa Lähetä.
 
 ## Sähkön hinnan seuranta (Esimerkki)
