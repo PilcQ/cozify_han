@@ -21,21 +21,18 @@ from homeassistant.helpers.update_coordinator import (
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Aseta sensorit (YAML-konfiguraation kautta tai integraationa)."""
-    
-    # Haetaan IP-osoite konfiguraatiosta
-    host = config.get(CONF_HOST)
-    
-    # Muodostetaan URL dynaamisesti (alkuperäinen polku oli /meter) 
+    async def async_setup_entry(hass, entry, async_add_entities):
+    """Aseta sensorit Config Entryn perusteella."""
+    config = entry.data
+    host = config[CONF_HOST]
     url = f"http://{host}/meter"
-
+    
     async def async_update_data():
         async with aiohttp.ClientSession() as session:
             async with async_timeout.timeout(10):
                 async with session.get(url) as response:
                     return await response.json()
-
+   
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
@@ -91,11 +88,7 @@ class CozifyArraySensor(CoordinatorEntity, SensorEntity):
         return 0
 # sensor.py (alkuosa säilyy samana kuin aiemmin)
 
-async def async_setup_entry(hass, entry, async_add_entities):
-    """Aseta sensorit Config Entryn perusteella."""
-    config = entry.data
-    host = config[CONF_HOST]
-    url = f"http://{host}/meter"
+
 
     # Tähän tulee sama Coordinator-logiikka kuin aiemmin viestissäni
     # Mutta se käyttää nyt tätä dynaamista URL-osoitetta
