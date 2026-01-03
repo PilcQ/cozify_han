@@ -33,27 +33,27 @@ Voit käyttää integraation luomaa `sensor.cozify_han_power_total` -sensoria la
 ## Cozify HAN
 Cozify HAN on kotimainen, avainlipputuote, joka tuo sähkömittarin HAN/P1-rajapinnan tiedot reaaliaikaisesti paikallisverkkoon, pilveen ja älyjärjestelmiin. Se on suunniteltu erityisesti pohjoisiin olosuhteisiin, helppoon itseasennukseen ja laajaan integraatioon (RestAPI, MQTT ja Modbus) energiankäytön optimointia, kuormanhallintaa ja automaatiota varten.
 
-Keskeiset ominaisuudet
-• Reaaliaikainen mittausdata: hetkellinen teho (W/kW), jännite (V), virta (A) ja kumulatiiviset kulutusluvut (kWh) vaihekohtaisesti, kaikki data mitä HAN/P1 väylästä tulee
-• Tukee Ethernet (RJ45)‑yhteyttä ja WiFi‑yhteyttä; mahdollisuus vaihtaa alkuperäinen antenni RP‑SMA‑ulkoinen antenniin parempaa kantamaa varten
-• Sisäänrakennettu HTTP OpenAPI‑palvelin (/meter), MQTT‑lähetys ja Modbus (TCP)‑rajapinnat B2B‑integraatioihin
-• Toimii Android- ja iOS‑sovelluksen kanssa, OTA‑firmware‑päivitykset takaavat jatkokehityksen ja tietoturvan
-• Suunniteltu toimimaan pohjoismaisissa olosuhteissa –40 °C … +60 °C ja samalla IP‑luokituksella kuin sähkömittari
+## Keskeiset ominaisuudet ##
+* Reaaliaikainen mittausdata: hetkellinen teho (W/kW), jännite (V), virta (A) ja kumulatiiviset kulutusluvut (kWh) vaihekohtaisesti, kaikki data mitä HAN/P1 väylästä tulee
+* Tukee Ethernet (RJ45)‑yhteyttä ja WiFi‑yhteyttä; mahdollisuus vaihtaa alkuperäinen antenni RP‑SMA‑ulkoinen antenniin parempaa kantamaa varten
+* Sisäänrakennettu HTTP OpenAPI‑palvelin (/meter), MQTT‑lähetys ja Modbus (TCP)‑rajapinnat B2B‑integraatioihin
+* Toimii Android- ja iOS‑sovelluksen kanssa, OTA‑firmware‑päivitykset takaavat jatkokehityksen ja tietoturvan
+* Suunniteltu toimimaan pohjoismaisissa olosuhteissa –40 °C … +60 °C ja samalla IP‑luokituksella kuin sähkömittari
 
-Mitä laite tarjoaa käyttäjälle
-• Täsmällinen reaaliaikainen näkyvyys sähkönkulutukseen ja tuotantoon
-• Vaihekohtaisten kuormitusnäkymien avulla helppo tunnistaa ylikuormitusriskit ja tasata kuormia
-• Parempi mahdollisuus hyödyntää tunti- ja varttihintaa sekä reaaliaikaista ohjausta älykkäässä latauksessa ja lämmityksessä
-• Integroituu olemassa oleviin kotiautomaatioalustoihin (esim. Home Assistant) ja energianhallintajärjestelmiin (EVCC.io jne.). Rajapintojen Modbus (TCP), MQTT ja RestAPI kautta integrointimmahdollisuudet ovat rajattomat. Lisää rajapintoja tulevaisuudessa.
+## Mitä laite tarjoaa käyttäjälle##
+* Täsmällinen reaaliaikainen näkyvyys sähkönkulutukseen ja tuotantoon
+* Vaihekohtaisten kuormitusnäkymien avulla helppo tunnistaa ylikuormitusriskit ja tasata kuormia
+* Parempi mahdollisuus hyödyntää tunti- ja varttihintaa sekä reaaliaikaista ohjausta älykkäässä latauksessa ja lämmityksessä
+* Integroituu olemassa oleviin kotiautomaatioalustoihin (esim. Home Assistant) ja energianhallintajärjestelmiin (EVCC.io jne.). Rajapintojen Modbus (TCP), MQTT ja RestAPI kautta integrointimmahdollisuudet ovat rajattomat. Lisää rajapintoja tulevaisuudessa.
 
-Tekniset tiedot
-• Liitännät: RJ12 (HAN/P1), RJ45 (Ethernet), WiFi , USB‑C (lisävirta),  RP-SMA (WiFi lisäantenni).
-• Rajapinnat: OpenAPI (HTTP, /meter), MQTT (JSON‑payload), Modbus TCP (rekisterit).
-• Käyttöympäristö: −40 °C … +60 °C; kotelo ja liitännät sähkömittariluokan mukaiset.
+## Tekniset tiedot ##
+* Liitännät: RJ12 (HAN/P1), RJ45 (Ethernet), WiFi , USB‑C (lisävirta),  RP-SMA (WiFi lisäantenni)
+* Rajapinnat: OpenAPI (HTTP, /meter), MQTT (JSON‑payload), Modbus TCP (rekisterit)
+* Käyttöympäristö: −40 °C … +60 °C; kotelo ja liitännät sähkömittariluokan mukaiset
 
-Asennus ja käyttöönotto
-• Itseasennettava; sijoitetaan sähkömittarin viereen ja kiinnitetään esim. kaksipuolisella teipillä
-• Jos mittari on metallisessa kaapissa, suositellaan Ethernet‑yhteyttä tai ulkoista RP‑SMA‑antennia luotettavan yhteyden varmistamiseksi
+## Asennus ja käyttöönotto ##
+* Itseasennettava; sijoitetaan sähkömittarin viereen ja kiinnitetään esim. kaksipuolisella teipillä
+* Jos mittari on metallisessa kaapissa, suositellaan Ethernet‑yhteyttä tai ulkoista RP‑SMA‑antennia luotettavan yhteyden varmistamiseksi
 
 ## Kehitys ja tuki
 Tämä on yhteisöpohjainen integraatio. Jos huomaat virheitä tai haluat kehittää sitä eteenpäin, luo "Issue" tai "Pull Request" GitHubissa.
