@@ -64,10 +64,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
         CozifyArraySensor(coordinator, "i", 0, "Current L1", UnitOfElectricCurrent.AMPERE),
         CozifyArraySensor(coordinator, "i", 1, "Current L2", UnitOfElectricCurrent.AMPERE),
         CozifyArraySensor(coordinator, "i", 2, "Current L3", UnitOfElectricCurrent.AMPERE),
-        CozifyArraySensor(coordinator, "q", 0, "Reactive Power Total", "var"),
-        CozifyArraySensor(coordinator, "q", 1, "Reactive Power L1", "var"),
-        CozifyArraySensor(coordinator, "q", 2, "Reactive Power L2", "var"),
-        CozifyArraySensor(coordinator, "q", 3, "Reactive Power L3", "var"),
+        CozifyArraySensor(coordinator, "r", 0, "Reactive Power Total", "var"),
+        CozifyArraySensor(coordinator, "r", 1, "Reactive Power L1", "var"),
+        CozifyArraySensor(coordinator, "r", 2, "Reactive Power L2", "var"),
+        CozifyArraySensor(coordinator, "r", 3, "Reactive Power L3", "var"),
     ]
     
     async_add_entities(sensors)
