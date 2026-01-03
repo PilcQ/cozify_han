@@ -47,9 +47,9 @@ Mitä laite tarjoaa käyttäjälle
 • Integroituu olemassa oleviin kotiautomaatioalustoihin (esim. Home Assistant) ja energianhallintajärjestelmiin (EVCC.io jne.). Rajapintojen Modbus (TCP), MQTT ja RestAPI kautta integrointimmahdollisuudet ovat rajattomat. Lisää rajapintoja tulevaisuudessa.
 
 Tekniset tiedot
-• Liitännät: RJ12 (HAN/P1), RJ45 (Ethernet), WiFi , USB‑C (lisävirta),  RP-SMA (WiFi lisäantenni)
-• Rajapinnat: OpenAPI (HTTP, /meter), MQTT (JSON‑payload), Modbus TCP (rekisterit)
-• Käyttöympäristö: −40 °C … +60 °C; kotelo ja liitännät sähkömittariluokan mukaiset
+• Liitännät: RJ12 (HAN/P1), RJ45 (Ethernet), WiFi , USB‑C (lisävirta),  RP-SMA (WiFi lisäantenni).
+• Rajapinnat: OpenAPI (HTTP, /meter), MQTT (JSON‑payload), Modbus TCP (rekisterit).
+• Käyttöympäristö: −40 °C … +60 °C; kotelo ja liitännät sähkömittariluokan mukaiset.
 
 Asennus ja käyttöönotto
 • Itseasennettava; sijoitetaan sähkömittarin viereen ja kiinnitetään esim. kaksipuolisella teipillä
