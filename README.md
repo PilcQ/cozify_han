@@ -40,7 +40,7 @@ Cozify HAN on kotimainen, avainlipputuote, joka tuo sähkömittarin HAN/P1-rajap
 * Toimii Android- ja iOS‑sovelluksen kanssa, OTA‑firmware‑päivitykset takaavat jatkokehityksen ja tietoturvan
 * Suunniteltu toimimaan pohjoismaisissa olosuhteissa –40 °C … +60 °C ja samalla IP‑luokituksella kuin sähkömittari
 
-## Mitä laite tarjoaa käyttäjälle##
+## Mitä laite tarjoaa käyttäjälle ##
 * Täsmällinen reaaliaikainen näkyvyys sähkönkulutukseen ja tuotantoon
 * Vaihekohtaisten kuormitusnäkymien avulla helppo tunnistaa ylikuormitusriskit ja tasata kuormia
 * Parempi mahdollisuus hyödyntää tunti- ja varttihintaa sekä reaaliaikaista ohjausta älykkäässä latauksessa ja lämmityksessä
