@@ -5,7 +5,7 @@
   "dependencies": [],
   "documentation": "https://github.com/pilcq/cozify-han",
   "iot_class": "local_polling",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "config_flow": true
   "note": "This is the way to write personal notes to manifest.json",
 }
