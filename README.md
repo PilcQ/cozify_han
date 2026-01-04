@@ -1,8 +1,22 @@
 # Cozify HAN for Home Assistant
 
+Custom integration for Home Assistant to fetch real-time energy data from the Cozify HAN Bridge (P1 meter).
+
+## Features
+- **Real-time Power:** Total and phase-specific (L1, L2, L3) power consumption.
+- **Voltage & Current:** Per-phase monitoring.
+- **Reactive Power:** Support for reactive power monitoring (VAr).
+- **Energy Statistics:** Total imported and exported energy for Home Assistant Energy Dashboard.
+
+## Installation
+
+### Via HACS (Recommended)
+1. Search for `Cozify HAN` in HACS.
+2. Click **Download**.
+3. Restart Home Assistant.
+4. Go to **Settings** -> **Devices & Services** -> **Add Integration** and search for "Cozify HAN".
+
 Tämä integraatio tuo Cozify HAN -lukijan sähkömittaustiedot suoraan Home Assistantiin paikallisverkon yli. Se hakee tiedot suoraan Cozify HAN laitteen REST-rajapinnasta, mikä tekee siitä nopean ja luotettavan.
-
-
 
 ## Ominaisuudet
 * **Reaaliaikainen seuranta:** Päivitysväli oletuksena 5 sekuntia.
