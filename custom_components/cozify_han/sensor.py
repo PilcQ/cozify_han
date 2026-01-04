@@ -83,6 +83,7 @@ class CozifyEnergySensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+        self._attr_has_entity_name = True
 
     @property
     def native_value(self):
@@ -111,6 +112,7 @@ class CozifyArraySensor(CoordinatorEntity, SensorEntity):
         self._attr_name = f"Cozify HAN {name}"
         self._attr_unique_id = f"cozify_han_{key}_{index}"
         self._attr_native_unit_of_measurement = unit
+        self._attr_has_entity_name = True
         
         if unit == UnitOfPower.WATT:
             self._attr_device_class = SensorDeviceClass.POWER
