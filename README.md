@@ -6,7 +6,7 @@ Tämä integraatio tuo Cozify HAN -lukijan sähkömittaustiedot suoraan Home Ass
 
 ## Ominaisuudet
 * **Reaaliaikainen seuranta:** Päivitysväli oletuksena 5 sekuntia.
-* **Kokonaiskulutus:** Sähköenergian osto (Import) ja myynti (Export) kWh. Myyntiä voi yleensä olla jos on esimerkiksi aurinkopaneleja.
+* **Kokonaiskulutus:** Sähköenergian osto (Import) ja myynti (Export) kWh. Myyntiä voi yleensä olla jos on esimerkiksi aurinkopaneeleja.
 * **Vaihekohtaiset tiedot:** Teho (W), Jännite (V), Virta (A) ja Loisteho (VAr) jokaiselle vaiheelle (L1, L2, L3).
 * **Helppo asennus:** Täysi Config Flow -tuki (Cozify HAN laitteen IP:n asetus suoraan käyttöliittymästä).
 
