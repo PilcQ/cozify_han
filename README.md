@@ -16,6 +16,8 @@ Custom integration for Home Assistant to fetch real-time energy data from the Co
 3. Restart Home Assistant.
 4. Go to **Settings** -> **Devices & Services** -> **Add Integration** and search for "Cozify HAN".
 
+# Cozify HAN asennus Home Assistant:iin
+
 Tämä integraatio tuo Cozify HAN -lukijan sähkömittaustiedot suoraan Home Assistantiin paikallisverkon yli. Se hakee tiedot suoraan Cozify HAN laitteen REST-rajapinnasta, mikä tekee siitä nopean ja luotettavan.
 
 ## Ominaisuudet
