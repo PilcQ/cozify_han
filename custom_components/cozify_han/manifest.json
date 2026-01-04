@@ -3,10 +3,9 @@
   "name": "Cozify HAN",
   "codeowners": ["@pilcq"],
   "dependencies": [],
-  "note": "is_build_in=false, hakee kuvat paikallisesti",
-  "is_built_in": false,
   "documentation": "https://github.com/pilcq/cozify-han",
   "iot_class": "local_polling",
   "version": "1.0.10",
   "config_flow": true
+  "note": "This is the way to write personal notes to manifest.json",
 }
