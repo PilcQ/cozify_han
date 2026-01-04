@@ -25,20 +25,22 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Aseta sensorit."""
+    """Aseta sensorit käyttöliittymästä tehdyn asennuksen perusteella."""
     host = entry.data[CONF_HOST]
     url = f"http://{host}/meter"
 
     async def async_update_data():
+        """Hae data Cozify HAN -laitteesta."""
         try:
             async with aiohttp.ClientSession() as session:
                 async with async_timeout.timeout(10):
                     async with session.get(url) as response:
                         if response.status != 200:
+                            _LOGGER.error("Virhe haettaessa dataa: %s", response.status)
                             return None
                         return await response.json()
         except Exception as err:
-            _LOGGER.error("Yhteysvirhe: %s", err)
+            _LOGGER.error("Yhteysvirhe Cozify HAN -laitteeseen: %s", err)
             return None
 
     coordinator = DataUpdateCoordinator(
@@ -48,6 +50,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
         update_method=async_update_data,
         update_interval=timedelta(seconds=5),
     )
+
+    # LISÄTTY: Linkitetään config_entry koordinaattoriin, jotta device_info toimii
+    coordinator.config_entry = entry
 
     await coordinator.async_config_entry_first_refresh()
 
@@ -70,17 +75,21 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async_add_entities(sensors)
 
 class CozifyBaseEntity(CoordinatorEntity):
-    """Yhteinen pohja kaikille Cozify-sensoreille laiterekisteriä varten."""
+    """Yhteinen pohja kaikille Cozify-sensoreille laitteiden ryhmittelyä varten."""
+    
     @property
     def device_info(self):
+        """Yhdistää sensorit Cozify HAN -laitteeseen HA:n laitelistauksessa."""
         return {
             "identifiers": {(DOMAIN, self.coordinator.config_entry.entry_id)},
             "name": "Cozify HAN Bridge",
             "manufacturer": "Cozify",
             "model": "HAN-P1",
+            "sw_version": "1.1.0",
         }
 
 class CozifyEnergySensor(CozifyBaseEntity, SensorEntity):
+    """Energiasensori (kWh) kumulatiiviselle kulutukselle."""
     def __init__(self, coordinator, key, name, unit):
         super().__init__(coordinator)
         self._key = key
@@ -92,10 +101,12 @@ class CozifyEnergySensor(CozifyBaseEntity, SensorEntity):
 
     @property
     def native_value(self):
-        if self.coordinator.data is None: return None
+        if self.coordinator.data is None:
+            return None
         return float(self.coordinator.data.get(self._key, 0))
 
 class CozifyArraySensor(CozifyBaseEntity, SensorEntity):
+    """Sensori taulukkomuotoiselle datalle (W, V, A)."""
     def __init__(self, coordinator, key, index, name, unit):
         super().__init__(coordinator)
         self._key = key
@@ -114,13 +125,15 @@ class CozifyArraySensor(CozifyBaseEntity, SensorEntity):
 
     @property
     def native_value(self):
-        if self.coordinator.data is None: return None
+        if self.coordinator.data is None:
+            return None
         arr = self.coordinator.data.get(self._key, [])
         if isinstance(arr, list) and len(arr) > self._index:
             return float(arr[self._index])
         return 0
 
 class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
+    """Sensori, joka tallentaa päivän korkeimman teholukeman (W)."""
     def __init__(self, coordinator):
         super().__init__(coordinator)
         self._attr_name = "Cozify HAN Peak Power Today"
@@ -133,18 +146,23 @@ class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
 
     @property
     def native_value(self):
-        if self.coordinator.data is None: return self._peak_value
+        if self.coordinator.data is None:
+            return self._peak_value
+            
         p_data = self.coordinator.data.get('p', [])
-        if not p_data: return self._peak_value
+        if not isinstance(p_data, list) or len(p_data) == 0:
+            return self._peak_value
             
         current_power = float(p_data[0])
         current_day = datetime.now().day
 
+        # Nollaus keskiyöllä
         if current_day != self._last_reset_day:
             self._peak_value = 0
             self._last_reset_day = current_day
 
+        # Päivitetään huippu, jos nykyinen teho on suurempi
         if current_power > self._peak_value:
             self._peak_value = current_power
 
-        return self._peak_value
+        return self._peak_value{
