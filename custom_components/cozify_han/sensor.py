@@ -51,7 +51,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         update_interval=timedelta(seconds=5),
     )
 
-    # LISÄTTY: Linkitetään config_entry koordinaattoriin, jotta device_info toimii
+    # Linkitetään config_entry koordinaattoriin laitehallintaa varten
     coordinator.config_entry = entry
 
     await coordinator.async_config_entry_first_refresh()
@@ -165,4 +165,4 @@ class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
         if current_power > self._peak_value:
             self._peak_value = current_power
 
-        return self._peak_value{
+        return self._peak_value
