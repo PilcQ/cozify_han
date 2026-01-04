@@ -115,29 +115,3 @@ class CozifyArraySensor(CoordinatorEntity, SensorEntity):
         if isinstance(arr, list) and len(arr) > self._index:
             return float(arr[self._index])
         return 0
-
-#Tämä sensori ei vain lue dataa laitteelta, vaan se muistaa päivän korkeimman arvon ja nollaantuu keskiyöllä.
-from datetime import datetime
-
-# Lisää tämä sensoriluokkaan tai koordinaattoriin
-class CozifyPeakPowerSensor(CozifySensor):
-    def __init__(self, coordinator):
-        super().__init__(coordinator, "peak_power_today", "Peak Power Today", "W")
-        self._peak_value = 0
-        self._last_reset_day = datetime.now().day
-
-    @property
-    def state(self):
-        current_power = self.coordinator.data.get('p_total')
-        current_day = datetime.now().day
-
-        # Nollaus keskiyöllä
-        if current_day != self._last_reset_day:
-            self._peak_value = 0
-            self._last_reset_day = current_day
-
-        # Päivitetään huippu, jos nykyinen teho on suurempi
-        if current_power > self._peak_value:
-            self._peak_value = current_power
-
-        return self._peak_value
