@@ -74,6 +74,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class CozifyEnergySensor(CoordinatorEntity, SensorEntity):
     """Energiasensori (kWh)."""
+          
     def __init__(self, coordinator, key, name, unit):
         super().__init__(coordinator)
         self._key = key
@@ -88,6 +89,18 @@ class CozifyEnergySensor(CoordinatorEntity, SensorEntity):
         if self.coordinator.data is None:
             return None
         return float(self.coordinator.data.get(self._key, 0))
+
+    @property
+    def device_info(self):
+        """Yhdistää sensorin Cozify HAN -laitteeseen."""
+        return {
+            "identifiers": {(DOMAIN, self.coordinator.config_entry.entry_id)},
+            "name": "Cozify HAN",
+            "manufacturer": "Cozify",
+            "model": "HAN-P1",
+            "hw_version": "1.0",
+            "sw_version": "0.0.1.20", # Voit päivittää tätä version mukaan
+        }
 
 class CozifyArraySensor(CoordinatorEntity, SensorEntity):
     """Array-pohjainen sensori (W, V, A)."""
@@ -115,3 +128,15 @@ class CozifyArraySensor(CoordinatorEntity, SensorEntity):
         if isinstance(arr, list) and len(arr) > self._index:
             return float(arr[self._index])
         return 0
+
+    @property
+    def device_info(self):
+        """Yhdistää sensorin Cozify HAN -laitteeseen."""
+        return {
+            "identifiers": {(DOMAIN, self.coordinator.config_entry.entry_id)},
+            "name": "Cozify HAN",
+            "manufacturer": "Cozify",
+            "model": "HAN-P1",
+            "hw_version": "1.0",
+            "sw_version": "0.0.1.20", # Voit päivittää tätä version mukaan
+        }
