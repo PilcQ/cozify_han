@@ -21,7 +21,7 @@ Custom integration for Home Assistant to fetch real-time energy data from the Co
 Tämä integraatio tuo Cozify HAN -lukijan sähkömittaustiedot suoraan Home Assistantiin paikallisverkon yli. Se hakee tiedot suoraan Cozify HAN laitteen REST-rajapinnasta, mikä tekee siitä nopean ja luotettavan.
 
 ## Ominaisuudet
-* **Reaaliaikainen seuranta:** Päivitysväli oletuksena 5 sekuntia.
+* **Reaaliaikainen seuranta:** Päivitysväli oletuksena 10 sekuntia, muutettavissa käyttöliittymästä 5-60s.
 * **Kokonaiskulutus:** Sähköenergian osto (Import) ja myynti (Export) kWh. Myyntiä voi yleensä olla jos on esimerkiksi aurinkopaneeleja.
 * **Vaihekohtaiset tiedot:** Teho (W), Jännite (V), Virta (A) ja Loisteho (VAr) jokaiselle vaiheelle (L1, L2, L3).
 * **Helppo asennus:** Täysi Config Flow -tuki (Cozify HAN laitteen IP:n asetus suoraan käyttöliittymästä).
