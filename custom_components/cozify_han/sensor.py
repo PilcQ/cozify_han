@@ -82,7 +82,7 @@ class CozifyBaseEntity(CoordinatorEntity):
         """Linkittää sensorit samaan laitteeseen Device Registryssä."""
         return {
             "identifiers": {(DOMAIN, self._entry.entry_id)},
-            "name": "Cozify HAN Bridge",
+            "name": "Cozify HAN",
             "manufacturer": "Cozify",
             "model": "HAN-P1",
             "configuration_url": f"http://{self._entry.data[CONF_HOST]}",
