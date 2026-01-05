@@ -89,7 +89,7 @@ class CozifyBaseEntity(CoordinatorEntity):
             "name": "Cozify HAN",
             "manufacturer": "Cozify",
             "model": "HAN-P1",
-            "configuration_url": f"http://{self._entry.data[CONF_HOST]/meter}",
+            "configuration_url": f"http://{self._entry.data[CONF_HOST]}/meter",
         }
 
 class CozifyEnergySensor(CozifyBaseEntity, SensorEntity):
