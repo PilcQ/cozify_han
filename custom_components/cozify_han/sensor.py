@@ -123,6 +123,9 @@ class CozifyArraySensor(CozifyBaseEntity, SensorEntity):
             self._attr_device_class = SensorDeviceClass.VOLTAGE
         elif unit == UnitOfElectricCurrent.AMPERE:
             self._attr_device_class = SensorDeviceClass.CURRENT
+        elif unit == "var":
+            self._attr_device_class = SensorDeviceClass.REACTIVE_POWER
+            self._attr_state_class = SensorStateClass.MEASUREMENT
 
     @property
     def native_value(self):
