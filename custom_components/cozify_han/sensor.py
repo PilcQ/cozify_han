@@ -1,7 +1,11 @@
 import logging
 from datetime import timedelta, datetime
+from homeassistant.helpers.entity import EntityCategory
+from homeassistant.util import dt as dt_util
 import async_timeout
 import aiohttp
+
+
 
 from homeassistant.components.sensor import (
     SensorEntity,
@@ -34,7 +38,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         try:
             async with aiohttp.ClientSession() as session:
                 async with async_timeout.timeout(10):
-                    async with session.get(url) as response:
+                    async with session.get(url, ssl=False) as response:
                         if response.status != 200:
                             return None
                         return await response.json()
@@ -42,12 +46,15 @@ async def async_setup_entry(hass, entry, async_add_entities):
             _LOGGER.error("Virhe haettaessa dataa: %s", err)
             return None
 
+    # Hae päivitysväli asetuksista, oletus 5s jos ei asetettu
+    scan_interval = entry.options.get("update_interval", 5)
+
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
-        name="cozify_han_data",
+        name="Cozify HAN sensor",
         update_method=async_update_data,
-        update_interval=timedelta(seconds=5),
+        update_interval=timedelta(seconds=scan_interval),
     )
 
     await coordinator.async_config_entry_first_refresh()
@@ -70,7 +77,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
         CozifyArraySensor(coordinator, entry, "r", 1, "Reactive Power L1", "var"),
         CozifyArraySensor(coordinator, entry, "r", 2, "Reactive Power L2", "var"),
         CozifyArraySensor(coordinator, entry, "r", 3, "Reactive Power L3", "var"),
-        CozifyPeakPowerSensor(coordinator, entry)
+        CozifyDiagnosticSensor(coordinator, entry, "IP Address", entry.data[CONF_HOST]),
+        CozifyPeakPowerSensor(coordinator, entry),
+        CozifyTimestampSensor(coordinator, entry),
+        CozifyDiagnosticSensor(coordinator, entry, "Update Interval", f"{scan_interval}s")
     ]
     
     async_add_entities(sensors)
@@ -163,3 +173,42 @@ class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
             self._peak_value = current_power
 
         return self._peak_value
+        
+class CozifyDiagnosticSensor(CozifyBaseEntity, SensorEntity):
+    """Yleinen diagnostiikkasensori (esim. IP-osoite)."""
+    def __init__(self, coordinator, entry, name, value):
+        super().__init__(coordinator, entry)
+        self._attr_name = f"Cozify HAN {name}"
+        self._attr_unique_id = f"{entry.entry_id}_{name.lower().replace(' ', '_')}"
+        self._value = value
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_icon = "mdi:information-outline"
+
+    @property
+    def native_value(self):
+        return self._value
+        
+class CozifyTimestampSensor(CozifyBaseEntity, SensorEntity):
+    """Näyttää milloin mittari on viimeksi päivittänyt datan."""
+    def __init__(self, coordinator, entry):
+        super().__init__(coordinator, entry)
+        self._attr_name = "Cozify HAN Last Update"
+        self._attr_unique_id = f"{entry.entry_id}_last_update"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_device_class = SensorDeviceClass.TIMESTAMP
+
+    @property
+    def native_value(self):
+        if self.coordinator.data is None:
+            return None
+            
+        # Haetaan 'ts' arvo. Jos se on esim. merkkijono, muutetaan se numeroksi.
+        ts = self.coordinator.data.get("ts")
+        
+        if ts is not None:
+            try:
+                # Muutetaan Unix-aikaleima (sekunnit) HA:n ymmärtämäksi UTC-ajaksi
+                return dt_util.utc_from_timestamp(float(ts))
+            except (ValueError, TypeError):
+                return None
+        return None
