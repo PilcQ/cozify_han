@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta, datetime
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.util import dt as dt_util
+from homeassistant.const import UnitOfElectricCurrent
 import async_timeout
 import aiohttp
 
@@ -20,7 +21,7 @@ from homeassistant.const import (
     CONF_HOST,
 )
 from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
+    CoordinatorEntity,https://hootsuite.com/#dashboard
     DataUpdateCoordinator,
 )
 
@@ -77,9 +78,12 @@ async def async_setup_entry(hass, entry, async_add_entities):
         CozifyArraySensor(coordinator, entry, "r", 1, "Reactive Power L1", "var"),
         CozifyArraySensor(coordinator, entry, "r", 2, "Reactive Power L2", "var"),
         CozifyArraySensor(coordinator, entry, "r", 3, "Reactive Power L3", "var"),
-        CozifyDiagnosticSensor(coordinator, entry, "IP Address", entry.data[CONF_HOST]),
+        CozifyMaxCurrentSensor(coordinator, entry, "Current Max, L1", 0),
+        CozifyMaxCurrentSensor(coordinator, entry, "Current Max, L2", 1),
+        CozifyMaxCurrentSensor(coordinator, entry, "Current Max, L3", 2),
         CozifyPeakPowerSensor(coordinator, entry),
         CozifyTimestampSensor(coordinator, entry),
+        CozifyDiagnosticSensor(coordinator, entry, "IP Address", entry.data[CONF_HOST]),
         CozifyDiagnosticSensor(coordinator, entry, "Update Interval", f"{scan_interval}s")
     ]
     
@@ -98,7 +102,7 @@ class CozifyBaseEntity(CoordinatorEntity):
             "identifiers": {(DOMAIN, self._entry.entry_id)},
             "name": "Cozify HAN",
             "manufacturer": "Cozify",
-            "model": "HAN-P1",
+            "model": "HAN-P1 Reader",
             "configuration_url": f"http://{self._entry.data[CONF_HOST]}/meter",
         }
 
@@ -148,7 +152,7 @@ class CozifyArraySensor(CozifyBaseEntity, SensorEntity):
 class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
     def __init__(self, coordinator, entry):
         super().__init__(coordinator, entry)
-        self._attr_name = "Cozify HAN Peak Power Today"
+        self._attr_name = "Cozify HAN Power Max"
         self._attr_unique_id = f"{entry.entry_id}_peak_power_today"
         self._attr_native_unit_of_measurement = UnitOfPower.WATT
         self._attr_device_class = SensorDeviceClass.POWER
@@ -212,3 +216,41 @@ class CozifyTimestampSensor(CozifyBaseEntity, SensorEntity):
             except (ValueError, TypeError):
                 return None
         return None
+        
+class CozifyMaxCurrentSensor(CozifyBaseEntity, SensorEntity):
+    """Sensori joka lukee ampeerit suoraan laitteelta ja tallentaa päivän maksimin."""
+
+    def __init__(self, coordinator, entry, name, phase_index):
+        super().__init__(coordinator, entry)
+        self._attr_name = f"Cozify HAN {name}"
+        self._attr_unique_id = f"{entry.entry_id}_max_current_p{phase_index}"
+        self._phase_index = phase_index
+        self._attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
+        self._attr_device_class = SensorDeviceClass.CURRENT
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._max_current = 0.0
+        self._last_reset_day = dt_util.now().day
+
+    @property
+    def native_value(self):
+        if self.coordinator.data is None:
+            return self._max_current
+
+        # Nollaus keskiyöllä
+        current_day = dt_util.now().day
+        if current_day != self._last_reset_day:
+            self._max_current = 0.0
+            self._last_reset_day = current_day
+
+        try:
+            # Haetaan ampeerit suoraan 'i' -listasta
+            # Esim. data['i'][0] on L1 virta
+            current_a = float(self.coordinator.data.get('i', [])[self._phase_index])
+            
+            # Päivitetään maksimi jos uusi lukema on suurempi
+            if current_a > self._max_current:
+                self._max_current = current_a
+        except (KeyError, IndexError, ValueError, TypeError):
+            pass
+
+        return self._max_current
