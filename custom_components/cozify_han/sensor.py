@@ -121,7 +121,7 @@ class CozifyBaseEntity(CoordinatorEntity):
             "model": self._device_info_data.get("model", "HAN Reader"),
             "sw_version": self._device_info_data.get("version"),
             "hw_version": self._device_info_data.get("serial"), # Sarjanumero tässä
-            "configuration_url": f"http://{self._entry.data[CONF_HOST]}",
+            "configuration_url": f"http://{self._entry.data[CONF_HOST]}/meter",
         }
 
 
