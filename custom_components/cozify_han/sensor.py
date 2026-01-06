@@ -1,12 +1,7 @@
 import logging
-from datetime import timedelta, datetime
+from datetime import timedelta
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.util import dt as dt_util
-from homeassistant.const import UnitOfElectricCurrent
-import async_timeout
-import aiohttp
-
-
 
 from homeassistant.components.sensor import (
     SensorEntity,
@@ -21,35 +16,44 @@ from homeassistant.const import (
     CONF_HOST,
 )
 from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,https://hootsuite.com/#dashboard
+    CoordinatorEntity,
     DataUpdateCoordinator,
+    UpdateFailed,
 )
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+import async_timeout
 
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Asetetaan sensorit entryn perusteella."""
+    """Asetetaan sensorit perustuen laitteen /meter vastaukseen."""
     host = entry.data[CONF_HOST]
-    url = f"http://{host}/meter"
+    session = async_get_clientsession(hass)
 
+    # 1. Haetaan laitteen tiedot osoitteesta /han
+    device_info_data = {}
+    try:
+        async with async_timeout.timeout(5):
+            response = await session.get(f"http://{host}/han", ssl=False)
+            if response.status == 200:
+                device_info_data = await response.json()
+    except Exception as err:
+        _LOGGER.warning("Laitetietojen haku /han epäonnistui: %s", err)
+
+    # 2. Päivitysmetodi: Haetaan data osoitteesta /meter
     async def async_update_data():
-        """Haetaan data laitteelta."""
         try:
-            async with aiohttp.ClientSession() as session:
-                async with async_timeout.timeout(10):
-                    async with session.get(url, ssl=False) as response:
-                        if response.status != 200:
-                            return None
-                        return await response.json()
+            async with async_timeout.timeout(5):
+                response = await session.get(f"http://{host}/meter", ssl=False)
+                if response.status != 200:
+                    raise UpdateFailed(f"Virheellinen statuskoodi: {response.status}")
+                return await response.json()
         except Exception as err:
-            _LOGGER.error("Virhe haettaessa dataa: %s", err)
-            return None
+            raise UpdateFailed(f"Yhteysvirhe: {err}")
 
-    # Hae päivitysväli asetuksista, oletus 5s jos ei asetettu
     scan_interval = entry.options.get("update_interval", 5)
-
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
@@ -60,58 +64,74 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
     await coordinator.async_config_entry_first_refresh()
 
-    # Määritellään sensorit
+    # Määritellään kaikki sensorit
     sensors = [
-        CozifyEnergySensor(coordinator, entry, "ic", "Total Power Imported", UnitOfEnergy.KILO_WATT_HOUR),
-        CozifyEnergySensor(coordinator, entry, "ec", "Total Power Exported", UnitOfEnergy.KILO_WATT_HOUR),
-        CozifyArraySensor(coordinator, entry, "p", 0, "Power Total", UnitOfPower.WATT),
-        CozifyArraySensor(coordinator, entry, "p", 1, "Power L1", UnitOfPower.WATT),
-        CozifyArraySensor(coordinator, entry, "p", 2, "Power L2", UnitOfPower.WATT),
-        CozifyArraySensor(coordinator, entry, "p", 3, "Power L3", UnitOfPower.WATT),
-        CozifyArraySensor(coordinator, entry, "u", 0, "Voltage L1", UnitOfElectricPotential.VOLT),
-        CozifyArraySensor(coordinator, entry, "u", 1, "Voltage L2", UnitOfElectricPotential.VOLT),
-        CozifyArraySensor(coordinator, entry, "u", 2, "Voltage L3", UnitOfElectricPotential.VOLT),
-        CozifyArraySensor(coordinator, entry, "i", 0, "Current L1", UnitOfElectricCurrent.AMPERE),
-        CozifyArraySensor(coordinator, entry, "i", 1, "Current L2", UnitOfElectricCurrent.AMPERE),
-        CozifyArraySensor(coordinator, entry, "i", 2, "Current L3", UnitOfElectricCurrent.AMPERE),
-        CozifyArraySensor(coordinator, entry, "r", 0, "Reactive Power Total", "var"),
-        CozifyArraySensor(coordinator, entry, "r", 1, "Reactive Power L1", "var"),
-        CozifyArraySensor(coordinator, entry, "r", 2, "Reactive Power L2", "var"),
-        CozifyArraySensor(coordinator, entry, "r", 3, "Reactive Power L3", "var"),
-        CozifyMaxCurrentSensor(coordinator, entry, "Current Max, L1", 0),
-        CozifyMaxCurrentSensor(coordinator, entry, "Current Max, L2", 1),
-        CozifyMaxCurrentSensor(coordinator, entry, "Current Max, L3", 2),
-        CozifyPeakPowerSensor(coordinator, entry),
-        CozifyTimestampSensor(coordinator, entry),
-        CozifyDiagnosticSensor(coordinator, entry, "IP Address", entry.data[CONF_HOST]),
-        CozifyDiagnosticSensor(coordinator, entry, "Update Interval", f"{scan_interval}s")
+        # Energia (kWh)
+        CozifyEnergySensor(coordinator, entry, "ic", "Total Power Imported", UnitOfEnergy.KILO_WATT_HOUR, device_info_data),
+        CozifyEnergySensor(coordinator, entry, "ec", "Total Power Exported", UnitOfEnergy.KILO_WATT_HOUR, device_info_data),
+        
+        # Tehot (p-lista: [Total, L1, L2, L3])
+        CozifyArraySensor(coordinator, entry, "p", 0, "Power Total", UnitOfPower.WATT, device_info_data),
+        CozifyArraySensor(coordinator, entry, "p", 1, "Power L1", UnitOfPower.WATT, device_info_data),
+        CozifyArraySensor(coordinator, entry, "p", 2, "Power L2", UnitOfPower.WATT, device_info_data),
+        CozifyArraySensor(coordinator, entry, "p", 3, "Power L3", UnitOfPower.WATT, device_info_data),
+        
+        # Jännitteet (u-lista: [L1, L2, L3])
+        CozifyArraySensor(coordinator, entry, "u", 0, "Voltage L1", UnitOfElectricPotential.VOLT, device_info_data),
+        CozifyArraySensor(coordinator, entry, "u", 1, "Voltage L2", UnitOfElectricPotential.VOLT, device_info_data),
+        CozifyArraySensor(coordinator, entry, "u", 2, "Voltage L3", UnitOfElectricPotential.VOLT, device_info_data),
+        
+        # Virrat (i-lista: [L1, L2, L3])
+        CozifyArraySensor(coordinator, entry, "i", 0, "Current L1", UnitOfElectricCurrent.AMPERE, device_info_data),
+        CozifyArraySensor(coordinator, entry, "i", 1, "Current L2", UnitOfElectricCurrent.AMPERE, device_info_data),
+        CozifyArraySensor(coordinator, entry, "i", 2, "Current L3", UnitOfElectricCurrent.AMPERE, device_info_data),
+
+        # Reaktiivinen teho (r-lista: [Total, L1, L2, L3])
+        CozifyArraySensor(coordinator, entry, "r", 0, "Reactive Power Total", "var", device_info_data),
+
+        # Päivittäiset maksimit ja diagnostiikka
+        CozifyMaxCurrentSensor(coordinator, entry, "Current Max L1", 0, device_info_data),
+        CozifyMaxCurrentSensor(coordinator, entry, "Current Max L2", 1, device_info_data),
+        CozifyMaxCurrentSensor(coordinator, entry, "Current Max L3", 2, device_info_data),
+        CozifyPeakPowerSensor(coordinator, entry, device_info_data),
+        CozifyTimestampSensor(coordinator, entry, device_info_data),
+    CozifyDiagnosticSensor(coordinator, entry, "MAC Address", device_info_data.get("mac"), device_info_data),
+        CozifyDiagnosticSensor(coordinator, entry, "Serial Number", device_info_data.get("serial"), device_info_data),
+        CozifyDiagnosticSensor(coordinator, entry, "IP Address", host, device_info_data)
     ]
     
     async_add_entities(sensors)
 
+
 class CozifyBaseEntity(CoordinatorEntity):
-    """Yhteinen pohja kaikille Cozify-sensoreille laitehallintaa varten."""
-    def __init__(self, coordinator, entry):
+    """Yhteinen kantaluokka kaikille Cozify-sensoreille."""
+
+    def __init__(self, coordinator, entry, device_info_data=None):
         super().__init__(coordinator)
         self._entry = entry
+        self._device_info_data = device_info_data or {}
 
     @property
     def device_info(self):
-        """Linkittää sensorit samaan laitteeseen Device Registryssä."""
+        """Palauttaa laitteen tiedot käyttäen /han osoitteesta saatuja tietoja."""
         return {
-            "identifiers": {(DOMAIN, self._entry.entry_id)},
-            "name": "Cozify HAN",
+            "identifiers": {(DOMAIN, self._device_info_data.get("mac", self._entry.entry_id))},
+            "name": self._device_info_data.get("name", "Cozify HAN"),
             "manufacturer": "Cozify",
-            "model": "HAN-P1 Reader",
-            "configuration_url": f"http://{self._entry.data[CONF_HOST]}/meter",
+            "model": self._device_info_data.get("model", "HAN Reader"),
+            "sw_version": self._device_info_data.get("version"),
+            "hw_version": self._device_info_data.get("serial"), # Sarjanumero tässä
+            "configuration_url": f"http://{self._entry.data[CONF_HOST]}",
         }
 
+
 class CozifyEnergySensor(CozifyBaseEntity, SensorEntity):
-    def __init__(self, coordinator, entry, key, name, unit):
-        super().__init__(coordinator, entry)
-        self._key = key
+    """Energiasensori (kWh)."""
+    def __init__(self, coordinator, entry, data_key, name, unit, device_info_data):
+        super().__init__(coordinator, entry, device_info_data)
+        self._data_key = data_key
         self._attr_name = f"Cozify HAN {name}"
-        self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_unique_id = f"{entry.entry_id}_{data_key}"
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
@@ -119,138 +139,122 @@ class CozifyEnergySensor(CozifyBaseEntity, SensorEntity):
     @property
     def native_value(self):
         if self.coordinator.data is None: return None
-        return float(self.coordinator.data.get(self._key, 0))
+        try:
+            return float(self.coordinator.data.get(self._data_key, 0))
+        except (TypeError, ValueError):
+            return None
+
 
 class CozifyArraySensor(CozifyBaseEntity, SensorEntity):
-    def __init__(self, coordinator, entry, key, index, name, unit):
-        super().__init__(coordinator, entry)
-        self._key = key
+    """Lukee arvoja JSON-listoista (u, i, p, r)."""
+    def __init__(self, coordinator, entry, data_key, index, name, unit, device_info_data):
+        super().__init__(coordinator, entry, device_info_data)
+        self._data_key = data_key
         self._index = index
         self._attr_name = f"Cozify HAN {name}"
-        self._attr_unique_id = f"{entry.entry_id}_{key}_{index}"
+        self._attr_unique_id = f"{entry.entry_id}_{data_key}_{index}"
         self._attr_native_unit_of_measurement = unit
+        self._attr_state_class = SensorStateClass.MEASUREMENT
         
         if unit == UnitOfPower.WATT:
             self._attr_device_class = SensorDeviceClass.POWER
-            self._attr_state_class = SensorStateClass.MEASUREMENT
         elif unit == UnitOfElectricPotential.VOLT:
             self._attr_device_class = SensorDeviceClass.VOLTAGE
         elif unit == UnitOfElectricCurrent.AMPERE:
             self._attr_device_class = SensorDeviceClass.CURRENT
-        elif unit == "var":
-            self._attr_device_class = SensorDeviceClass.REACTIVE_POWER
-            self._attr_state_class = SensorStateClass.MEASUREMENT
 
     @property
     def native_value(self):
         if self.coordinator.data is None: return None
-        arr = self.coordinator.data.get(self._key, [])
+        arr = self.coordinator.data.get(self._data_key)
         if isinstance(arr, list) and len(arr) > self._index:
-            return float(arr[self._index])
-        return 0
-
-class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
-    def __init__(self, coordinator, entry):
-        super().__init__(coordinator, entry)
-        self._attr_name = "Cozify HAN Power Max"
-        self._attr_unique_id = f"{entry.entry_id}_peak_power_today"
-        self._attr_native_unit_of_measurement = UnitOfPower.WATT
-        self._attr_device_class = SensorDeviceClass.POWER
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._peak_value = 0
-        self._last_reset_day = datetime.now().day
-
-    @property
-    def native_value(self):
-        if self.coordinator.data is None: return self._peak_value
-        p_data = self.coordinator.data.get('p', [])
-        if not p_data: return self._peak_value
-            
-        current_power = float(p_data[0])
-        current_day = datetime.now().day
-
-        if current_day != self._last_reset_day:
-            self._peak_value = 0
-            self._last_reset_day = current_day
-
-        if current_power > self._peak_value:
-            self._peak_value = current_power
-
-        return self._peak_value
-        
-class CozifyDiagnosticSensor(CozifyBaseEntity, SensorEntity):
-    """Yleinen diagnostiikkasensori (esim. IP-osoite)."""
-    def __init__(self, coordinator, entry, name, value):
-        super().__init__(coordinator, entry)
-        self._attr_name = f"Cozify HAN {name}"
-        self._attr_unique_id = f"{entry.entry_id}_{name.lower().replace(' ', '_')}"
-        self._value = value
-        self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self._attr_icon = "mdi:information-outline"
-
-    @property
-    def native_value(self):
-        return self._value
-        
-class CozifyTimestampSensor(CozifyBaseEntity, SensorEntity):
-    """Näyttää milloin mittari on viimeksi päivittänyt datan."""
-    def __init__(self, coordinator, entry):
-        super().__init__(coordinator, entry)
-        self._attr_name = "Cozify HAN Last Update"
-        self._attr_unique_id = f"{entry.entry_id}_last_update"
-        self._attr_entity_category = EntityCategory.DIAGNOSTIC
-        self._attr_device_class = SensorDeviceClass.TIMESTAMP
-
-    @property
-    def native_value(self):
-        if self.coordinator.data is None:
-            return None
-            
-        # Haetaan 'ts' arvo. Jos se on esim. merkkijono, muutetaan se numeroksi.
-        ts = self.coordinator.data.get("ts")
-        
-        if ts is not None:
             try:
-                # Muutetaan Unix-aikaleima (sekunnit) HA:n ymmärtämäksi UTC-ajaksi
-                return dt_util.utc_from_timestamp(float(ts))
+                val = arr[self._index]
+                return float(val) if val is not None else 0.0
             except (ValueError, TypeError):
-                return None
-        return None
-        
-class CozifyMaxCurrentSensor(CozifyBaseEntity, SensorEntity):
-    """Sensori joka lukee ampeerit suoraan laitteelta ja tallentaa päivän maksimin."""
+                return 0.0
+        return 0.0
 
-    def __init__(self, coordinator, entry, name, phase_index):
-        super().__init__(coordinator, entry)
+
+class CozifyMaxCurrentSensor(CozifyBaseEntity, SensorEntity):
+    """Tallentaa päivän korkeimman ampeerilukeman vaiheittain."""
+    def __init__(self, coordinator, entry, name, phase_index, device_info_data):
+        super().__init__(coordinator, entry, device_info_data)
         self._attr_name = f"Cozify HAN {name}"
-        self._attr_unique_id = f"{entry.entry_id}_max_current_p{phase_index}"
+        self._attr_unique_id = f"{entry.entry_id}_max_i_{phase_index}"
         self._phase_index = phase_index
         self._attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
         self._attr_device_class = SensorDeviceClass.CURRENT
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._max_current = 0.0
-        self._last_reset_day = dt_util.now().day
+        self._max_val = 0.0
+        self._day = dt_util.now().day
 
     @property
     def native_value(self):
-        if self.coordinator.data is None:
-            return self._max_current
-
-        # Nollaus keskiyöllä
-        current_day = dt_util.now().day
-        if current_day != self._last_reset_day:
-            self._max_current = 0.0
-            self._last_reset_day = current_day
-
+        if self.coordinator.data is None: return self._max_val
+        now = dt_util.now()
+        if now.day != self._day:
+            self._max_val = 0.0
+            self._day = now.day
         try:
-            # Haetaan ampeerit suoraan 'i' -listasta
-            # Esim. data['i'][0] on L1 virta
-            current_a = float(self.coordinator.data.get('i', [])[self._phase_index])
-            
-            # Päivitetään maksimi jos uusi lukema on suurempi
-            if current_a > self._max_current:
-                self._max_current = current_a
-        except (KeyError, IndexError, ValueError, TypeError):
-            pass
+            val = float(self.coordinator.data.get("i", [])[self._phase_index])
+            if val > self._max_val: self._max_val = val
+        except (IndexError, ValueError, TypeError): pass
+        return self._max_val
 
-        return self._max_current
+
+class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
+    """Päivän huipputeho (W)."""
+    def __init__(self, coordinator, entry, device_info_data):
+        super().__init__(coordinator, entry, device_info_data)
+        self._attr_name = "Cozify HAN Peak Power Day"
+        self._attr_unique_id = f"{entry.entry_id}_peak_p"
+        self._attr_native_unit_of_measurement = UnitOfPower.WATT
+        self._attr_device_class = SensorDeviceClass.POWER
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._max_p = 0.0
+        self._day = dt_util.now().day
+
+    @property
+    def native_value(self):
+        if self.coordinator.data is None: return self._max_p
+        now = dt_util.now()
+        if now.day != self._day:
+            self._max_p = 0.0
+            self._day = now.day
+        try:
+            val = float(self.coordinator.data.get("p", [0])[0])
+            if val > self._max_p: self._max_p = val
+        except (IndexError, ValueError, TypeError): pass
+        return self._max_p
+
+
+class CozifyTimestampSensor(CozifyBaseEntity, SensorEntity):
+    """Viimeisin päivitysaika."""
+    def __init__(self, coordinator, entry, device_info_data):
+        super().__init__(coordinator, entry, device_info_data)
+        self._attr_name = "Cozify HAN Last Update"
+        self._attr_unique_id = f"{entry.entry_id}_ts"
+        self._attr_device_class = SensorDeviceClass.TIMESTAMP
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def native_value(self):
+        if self.coordinator.data is None: return None
+        try:
+            return dt_util.utc_from_timestamp(float(self.coordinator.data.get("ts")))
+        except (TypeError, ValueError): return None
+
+
+class CozifyDiagnosticSensor(CozifyBaseEntity, SensorEntity):
+    """Staattiset diagnostiikkatiedot."""
+    def __init__(self, coordinator, entry, name, value, device_info_data):
+        super().__init__(coordinator, entry, device_info_data)
+        self._attr_name = f"Cozify HAN {name}"
+        self._attr_unique_id = f"{entry.entry_id}_{name.lower().replace(' ', '_')}"
+        self._attr_native_value = value
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def native_value(self):
+        return self._attr_native_value
