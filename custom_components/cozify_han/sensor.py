@@ -88,14 +88,17 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         # Reaktiivinen teho (r-lista: [Total, L1, L2, L3])
         CozifyArraySensor(coordinator, entry, "r", 0, "Reactive Power Total", "var", device_info_data),
-
+        CozifyArraySensor(coordinator, entry, "r", 1, "Reactive Power L1", "var", device_info_data),
+        CozifyArraySensor(coordinator, entry, "r", 2, "Reactive Power L2", "var", device_info_data),
+        CozifyArraySensor(coordinator, entry, "r", 3, "Reactive Power L3", "var", device_info_data),
+        
         # Päivittäiset maksimit ja diagnostiikka
         CozifyMaxCurrentSensor(coordinator, entry, "Current Max L1", 0, device_info_data),
         CozifyMaxCurrentSensor(coordinator, entry, "Current Max L2", 1, device_info_data),
         CozifyMaxCurrentSensor(coordinator, entry, "Current Max L3", 2, device_info_data),
         CozifyPeakPowerSensor(coordinator, entry, device_info_data),
         CozifyTimestampSensor(coordinator, entry, device_info_data),
-    CozifyDiagnosticSensor(coordinator, entry, "MAC Address", device_info_data.get("mac"), device_info_data),
+        CozifyDiagnosticSensor(coordinator, entry, "MAC Address", device_info_data.get("mac"), device_info_data),
         CozifyDiagnosticSensor(coordinator, entry, "Serial Number", device_info_data.get("serial"), device_info_data),
         CozifyDiagnosticSensor(coordinator, entry, "IP Address", host, device_info_data)
     ]
@@ -162,6 +165,8 @@ class CozifyArraySensor(CozifyBaseEntity, SensorEntity):
             self._attr_device_class = SensorDeviceClass.VOLTAGE
         elif unit == UnitOfElectricCurrent.AMPERE:
             self._attr_device_class = SensorDeviceClass.CURRENT
+        elif unit == "var":
+            self._attr_device_class = SensorDeviceClass.REACTIVE_POWER
 
     @property
     def native_value(self):
@@ -207,7 +212,7 @@ class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
     """Päivän huipputeho (W)."""
     def __init__(self, coordinator, entry, device_info_data):
         super().__init__(coordinator, entry, device_info_data)
-        self._attr_name = "Cozify HAN Peak Power Day"
+        self._attr_name = "Cozify HAN Power MAX"
         self._attr_unique_id = f"{entry.entry_id}_peak_p"
         self._attr_native_unit_of_measurement = UnitOfPower.WATT
         self._attr_device_class = SensorDeviceClass.POWER
