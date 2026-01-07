@@ -1,0 +1,37 @@
+blueprint:
+  name: Cozify HAN - Ylivirta-ilmoitus
+  description: Lähettää ilmoituksen, kun jokin vaihe ylittää määritetyn ampeerirajan.
+  domain: automation
+  input:
+    current_limit:
+      name: Ampeeriraja
+      description: Raja, jonka ylittymisestä haluat ilmoituksen (esim. 20).
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 63
+          unit_of_measurement: A
+    notification_service:
+      name: Ilmoituspalvelu
+      description: Valitse mihin laitteeseen ilmoitus lähetetään (esim. notify.mobile_app_iphone).
+      selector:
+        text:
+
+trigger:
+  - platform: numeric_state
+    entity_id:
+      - sensor.cozify_han_current_l1
+      - sensor.cozify_han_current_l2
+      - sensor.cozify_han_current_l3
+    above: !input current_limit
+
+action:
+  - service: !input notification_service
+    data:
+      title: "Cozify HAN: Suuri virrankulutus"
+      message: >
+        Varoitus! Yksi vaiheista on ylittänyt {{ current_limit }} ampeerin rajan.
+        L1: {{ states('sensor.cozify_han_current_l1') }} A
+        L2: {{ states('sensor.cozify_han_current_l2') }} A
+        L3: {{ states('sensor.cozify_han_current_l3') }} A
