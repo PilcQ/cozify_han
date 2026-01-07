@@ -1,37 +1,39 @@
 blueprint:
-  name: Cozify HAN - Ylivirta-ilmoitus
-  description: Lähettää ilmoituksen, kun jokin vaihe ylittää määritetyn ampeerirajan.
+  name: Cozify HAN Ylivirta-ilmoitus (Kaikki vaiheet)
+  description: Lähettää ilmoituksen, jos mikä tahansa vaihe (L1, L2 tai L3) ylittää rajan.
   domain: automation
   input:
-    current_limit:
-      name: Ampeeriraja
-      description: Raja, jonka ylittymisestä haluat ilmoituksen (esim. 20).
+    limit_value:
+      name: Virta-raja (A)
+      description: Ampeerimäärä, jonka ylityksestä ilmoitetaan kaikilla vaiheilla.
       default: 20
       selector:
         number:
           min: 1
-          max: 63
+          max: 100
           unit_of_measurement: A
-    notification_service:
-      name: Ilmoituspalvelu
-      description: Valitse mihin laitteeseen ilmoitus lähetetään (esim. notify.mobile_app_iphone).
+    notify_device:
+      name: Ilmoituskohde
+      description: Valitse puhelin, johon ilmoitus lähetetään.
       selector:
-        text:
+        device:
+          integration: mobile_app
+
+mode: restart
 
 trigger:
   - platform: numeric_state
-    entity_id:
+    entity_id: 
       - sensor.cozify_han_current_l1
       - sensor.cozify_han_current_l2
       - sensor.cozify_han_current_l3
-    above: !input current_limit
+    above: !input limit_value
 
 action:
-  - service: !input notification_service
-    data:
-      title: "Cozify HAN: Suuri virrankulutus"
-      message: >
-        Varoitus! Yksi vaiheista on ylittänyt {{ current_limit }} ampeerin rajan.
-        L1: {{ states('sensor.cozify_han_current_l1') }} A
-        L2: {{ states('sensor.cozify_han_current_l2') }} A
-        L3: {{ states('sensor.cozify_han_current_l3') }} A
+  - domain: mobile_app
+    type: notify
+    device_id: !input notify_device
+    title: "⚠️ Ylivirta-varoitus"
+    message: >
+      {{ state_attr(trigger.entity_id, 'friendly_name') if state_attr(trigger.entity_id, 'friendly_name') else trigger.to_state.name }} on ylittänyt rajan! 
+      Nykyinen arvo: {{ trigger.to_state.state }}A
