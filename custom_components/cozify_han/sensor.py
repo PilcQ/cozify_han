@@ -108,6 +108,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         CozifyHANConfigSensor(coordinator, entry, "eth_active", "Ethernet Active", None, None, EntityCategory.DIAGNOSTIC, device_info_data),
         CozifyHANConfigSensor(coordinator, entry, "wifi_active", "WiFi Active", None, None, EntityCategory.DIAGNOSTIC, device_info_data),
         CozifyHANConfigSensor(coordinator, entry, "price", "Fixed Electricity Price", "c/kWh", None, EntityCategory.DIAGNOSTIC, device_info_data),
+        CozifyHANConfigSensor(coordinator, entry, "timezone", "Timezone", None, None, EntityCategory.DIAGNOSTIC, device_info_data),
         
         # Päivittäiset maksimit ja diagnostiikka
         CozifyMaxCurrentSensor(coordinator, entry, "Current Max L1", 0, device_info_data),
@@ -250,6 +251,7 @@ class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
             self._day = now.day
             
         try:
+            # KORJATTU: Lisätty .data ja polku .get("realtime")
             realtime_data = self.coordinator.data.get("realtime", {})
             p_list = realtime_data.get("p", [0])
             val = float(p_list[0])
@@ -276,6 +278,7 @@ class CozifyTimestampSensor(CozifyBaseEntity, SensorEntity):
         if not self.coordinator.data:
             return None
         
+        # HAETAAN oikeasta lokerosta: realtime -> ts
         ts = self.coordinator.data.get("realtime", {}).get("ts")
         
         try:
@@ -311,6 +314,9 @@ class CozifyHANConfigSensor(CozifyBaseEntity, SensorEntity):
         if not self.coordinator.data: return None
         conf = self.coordinator.data.get("config", {})
 
+        # Aikavyöhyke
+        if self._key == "timezone": return conf.get("t")
+        
         # Sähkön kiinteähinta Cozify HAN sovelluksesta asetettu (c/kWh)
         if self._key == "price": 
             try:
