@@ -29,6 +29,22 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, entry, async_add_entities):
+    """Asetetaan sensorit perustuen laitteen /meter vastaukseen."""
+    host = entry.data[CONF_HOST]
+    session = async_get_clientsession(hass)
+
+    # 1. Haetaan laitteen tiedot osoitteesta /han
+    device_info_data = {}
+    try:
+        async with async_timeout.timeout(5):
+            response = await session.get(f"http://{host}/han", ssl=False)
+            if response.status == 200:
+                device_info_data = await response.json()
+    except Exception as err:
+        _LOGGER.warning("Laitetietojen haku /han epäonnistui: %s", err)
+
+    # 2. Päivitysmetodi: Haetaan data osoitteesta /meter
+async def async_setup_entry(hass, entry, async_add_entities):
     """Asetetaan sensorit."""
     host = entry.data[CONF_HOST]
     session = async_get_clientsession(hass)
@@ -107,6 +123,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         CozifyHANConfigSensor(coordinator, entry, "wifi_mode", "WiFi Mode", None, None, EntityCategory.DIAGNOSTIC, device_info_data),
         CozifyHANConfigSensor(coordinator, entry, "eth_active", "Ethernet Active", None, None, EntityCategory.DIAGNOSTIC, device_info_data),
         CozifyHANConfigSensor(coordinator, entry, "wifi_active", "WiFi Active", None, None, EntityCategory.DIAGNOSTIC, device_info_data),
+        CozifyHANConfigSensor(coordinator, entry, "wifi_channel", "WiFi Channel", None, None, EntityCategory.DIAGNOSTIC, device_info_data),
+        CozifyHANConfigSensor(coordinator, entry, "wifi_beacon", "WiFi Beacon Active", None, None, EntityCategory.DIAGNOSTIC, device_info_data),
         CozifyHANConfigSensor(coordinator, entry, "price", "Fixed Electricity Price", "c/kWh", None, EntityCategory.DIAGNOSTIC, device_info_data),
         CozifyHANConfigSensor(coordinator, entry, "timezone", "Timezone", None, None, EntityCategory.DIAGNOSTIC, device_info_data),
         
@@ -120,7 +138,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
         CozifyDiagnosticSensor(coordinator, entry, "Serial Number", device_info_data.get("serial"), device_info_data),
         CozifyDiagnosticSensor(coordinator, entry, "IP Address", host, device_info_data)
     ]
-    
     async_add_entities(sensors)
 
 
@@ -160,10 +177,8 @@ class CozifyEnergySensor(CozifyBaseEntity, SensorEntity):
     @property
     def native_value(self):
         if self.coordinator.data is None: return None
-        # Data on nyt 'realtime' -avaimen alla
-        val = self.coordinator.data.get("realtime", {}).get(self._data_key)
         try:
-            return float(val) if val is not None else None
+            return float(self.coordinator.data.get(self._data_key, 0))
         except (TypeError, ValueError):
             return None
 
@@ -243,24 +258,14 @@ class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
     @property
     def native_value(self):
         if self.coordinator.data is None: return self._max_p
-        
         now = dt_util.now()
-        # Nollataan huippu, jos päivä on vaihtunut
         if now.day != self._day:
             self._max_p = 0.0
             self._day = now.day
-            
         try:
-            # KORJATTU: Lisätty .data ja polku .get("realtime")
-            realtime_data = self.coordinator.data.get("realtime", {})
-            p_list = realtime_data.get("p", [0])
-            val = float(p_list[0])
-            
-            if val > self._max_p: 
-                self._max_p = val
-        except (IndexError, ValueError, TypeError): 
-            pass
-            
+            val = float(self.coordinator.get("realtime", {}).data.get("p", [0])[0])
+            if val > self._max_p: self._max_p = val
+        except (IndexError, ValueError, TypeError): pass
         return self._max_p
 
 
@@ -278,7 +283,6 @@ class CozifyTimestampSensor(CozifyBaseEntity, SensorEntity):
         if not self.coordinator.data:
             return None
         
-        # HAETAAN oikeasta lokerosta: realtime -> ts
         ts = self.coordinator.data.get("realtime", {}).get("ts")
         
         try:
@@ -288,16 +292,17 @@ class CozifyTimestampSensor(CozifyBaseEntity, SensorEntity):
 
 
 class CozifyDiagnosticSensor(CozifyBaseEntity, SensorEntity):
+    """Staattiset diagnostiikkatiedot."""
     def __init__(self, coordinator, entry, name, value, device_info_data):
         super().__init__(coordinator, entry, device_info_data)
         self._attr_name = f"Cozify HAN {name}"
         self._attr_unique_id = f"{entry.entry_id}_{name.lower().replace(' ', '_')}"
-        self._value = value # Käytetään sisäistä muuttujaa
+        self._attr_native_value = value
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def native_value(self):
-        return self._value
+        return self._attr_native_value
         
 class CozifyHANConfigSensor(CozifyBaseEntity, SensorEntity):
     """Sensorit /configuration osoitteesta."""
@@ -314,22 +319,25 @@ class CozifyHANConfigSensor(CozifyBaseEntity, SensorEntity):
         if not self.coordinator.data: return None
         conf = self.coordinator.data.get("config", {})
 
-        # Aikavyöhyke
-        if self._key == "timezone": return conf.get("t")
-        
-        # Sähkön kiinteähinta Cozify HAN sovelluksesta asetettu (c/kWh)
+        # Sähkön hinta (JSONissa "p")
         if self._key == "price": 
             try:
                 return float(conf.get("p", 0))
             except (TypeError, ValueError):
                 return 0.0
-                
-        if self._key == "eth_active": return conf.get("e", {}).get("e") is True
-        if self._key == "wifi_active": return conf.get("w", {}).get("e") is True
+
+        # Aikavyöhyke (JSONissa "t")
+        if self._key == "timezone": 
+            return conf.get("t")
+            
+        if self._key == "eth_active": return conf.get("e", {}).get("e") == True
+        if self._key == "wifi_active": return conf.get("w", {}).get("e") == True
         if self._key == "fuse": return conf.get("m", {}).get("f")
         if self._key == "eth_mode": return conf.get("e", {}).get("n", {}).get("m")
         if self._key == "wifi_ssid": return conf.get("w", {}).get("s")
         if self._key == "wifi_mode": return conf.get("w", {}).get("n", {}).get("m")
-        if self._key == "v": return conf.get("v")
+        if self._key == "wifi_channel": return conf.get("w", {}).get("z")
+        if self._key == "wifi_beacon": return conf.get("w", {}).get("b")
         
         return conf.get(self._key)
+
