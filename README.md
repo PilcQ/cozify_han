@@ -73,7 +73,8 @@ Cozify HAN on kotimainen, avainlipputuote, joka tuo sähkömittarin HAN/P1-rajap
 
 ## Automaatio - Blueprints
 * Lataa Home AUtomation järjestlemän kautta Settings - Automation & scenes - Blueprints - Import Blueprint - "Syötä oheinen osoite"
-* Home Assistant Blueprint pohja automaatiolle, joka varoittaa minkä tahansa vaiheen ylittäessä määritetty virtaraja. https://github.com/PilcQ/cozify_han/blob/main/blueprints/overcurrent_notification.yaml
+* Blueprint pohja automaatiolle, joka varoittaa minkä tahansa vaiheen ylittäessä määritetty virtaraja. https://github.com/PilcQ/cozify_han/blob/main/blueprints/overcurrent_notification.yaml
+* Blueprint pohja automaatiolle, joka varoittaa minkä tahansa vaiheen ylittäessä määritetty tehorajan. https://github.com/PilcQ/cozify_han/blob/main/blueprints/total_power_notification.yaml
   
 ## Kehitys ja tuki
 Tämä on yhteisöpohjainen integraatio. Jos huomaat virheitä tai haluat kehittää sitä eteenpäin, luo "Issue" tai "Pull Request" GitHubissa.
