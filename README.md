@@ -71,6 +71,9 @@ Cozify HAN on kotimainen, avainlipputuote, joka tuo sähkömittarin HAN/P1-rajap
 * Itseasennettava; sijoitetaan sähkömittarin viereen ja kiinnitetään esim. kaksipuolisella teipillä
 * Jos mittari on metallisessa kaapissa, suositellaan Ethernet‑yhteyttä tai ulkoista RP‑SMA‑antennia luotettavan yhteyden varmistamiseksi
 
+## Automaatio - Blueprints
+* Home Assistant Blueprint pohja automaatiolle, joka varoittaa minkä tahans avaiheen ylittäessä määritetty virtaraja.
+* * https://github.com/PilcQ/cozify_han/blob/main/blueprints/overcurrent_notification.yaml
 ## Kehitys ja tuki
 Tämä on yhteisöpohjainen integraatio. Jos huomaat virheitä tai haluat kehittää sitä eteenpäin, luo "Issue" tai "Pull Request" GitHubissa.
 
