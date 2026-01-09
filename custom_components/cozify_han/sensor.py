@@ -140,15 +140,29 @@ class CozifyBaseEntity(CoordinatorEntity):
 
     @property
     def device_info(self):
-        version = self.coordinator.data.get("config", {}).get("v") if self.coordinator.data else None
-        if not version: version = self._device_info_data.get("v")
+        # Haetaan dynaamiset tiedot koordinaattorista jos mahdollista
+        conf = self.coordinator.data.get("config", {}) if self.coordinator.data else {}
+        
+        # Firmware-versio
+        version = conf.get("v") or self._device_info_data.get("v")
+        
+        # Sarjanumero (haetaan ensin /han vastauksesta, sitten fallback)
+        serial = self._device_info_data.get("serial")
+        
+        # MAC-osoite (tärkein tunniste)
+        mac = self._device_info_data.get("mac", self._entry.entry_id)
+
         return {
-            "identifiers": {(DOMAIN, self._device_info_data.get("mac", self._entry.entry_id))},
+            "identifiers": {
+                (DOMAIN, mac),
+                (DOMAIN, serial) if serial else (DOMAIN, mac)
+            },
             "name": self._device_info_data.get("name", "Cozify HAN"),
             "manufacturer": "Cozify",
             "model": "HAN Reader",
             "sw_version": version,
-            "configuration_url": f"http://{self._entry.data[CONF_HOST]}/",
+            "serial_number": serial,  # Tämä tuo sarjanumeron näkyviin listaukseen
+            "configuration_url": f"http://{self._entry.data[CONF_HOST]}/meter",
         }
 
 class CozifyEnergySensor(CozifyBaseEntity, SensorEntity):
