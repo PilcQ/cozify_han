@@ -257,15 +257,14 @@ class CozifyPeakPowerSensor(CozifyBaseEntity, SensorEntity):
 
     @property
     def native_value(self):
-        if self.coordinator.data is None: return self._max_p
-        now = dt_util.now()
-        if now.day != self._day:
-            self._max_p = 0.0
-            self._day = now.day
+        if not self.coordinator.data: return self._max_p
+        # ... päivän vaihtumisen tarkistus ...
         try:
-            val = float(self.coordinator.get("realtime", {}).data.get("p", [0])[0])
-            if val > self._max_p: self._max_p = val
-        except (IndexError, ValueError, TypeError): pass
+            p_list = self.coordinator.data.get("realtime", {}).get("p", [])
+            if p_list:
+                val = float(p_list[0])
+                if val > self._max_p: self._max_p = val
+        except: pass
         return self._max_p
 
 
@@ -280,29 +279,23 @@ class CozifyTimestampSensor(CozifyBaseEntity, SensorEntity):
 
     @property
     def native_value(self):
-        if not self.coordinator.data:
-            return None
-        
+        if not self.coordinator.data: return None
         ts = self.coordinator.data.get("realtime", {}).get("ts")
-        
         try:
             return dt_util.utc_from_timestamp(float(ts)) if ts else None
-        except (TypeError, ValueError):
-            return None
-
+        except: return None
 
 class CozifyDiagnosticSensor(CozifyBaseEntity, SensorEntity):
-    """Staattiset diagnostiikkatiedot."""
     def __init__(self, coordinator, entry, name, value, device_info_data):
         super().__init__(coordinator, entry, device_info_data)
         self._attr_name = f"Cozify HAN {name}"
         self._attr_unique_id = f"{entry.entry_id}_{name.lower().replace(' ', '_')}"
-        self._attr_native_value = value
+        self._value = value
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def native_value(self):
-        return self._attr_native_value
+        return self._value
         
 class CozifyHANConfigSensor(CozifyBaseEntity, SensorEntity):
     """Sensorit /configuration osoitteesta."""
@@ -340,4 +333,3 @@ class CozifyHANConfigSensor(CozifyBaseEntity, SensorEntity):
         if self._key == "wifi_beacon": return conf.get("w", {}).get("b")
         
         return conf.get(self._key)
-
