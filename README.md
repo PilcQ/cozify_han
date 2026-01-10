@@ -1,6 +1,6 @@
 # Cozify HAN for Home Assistant
 
-<table style="border: transparent;" width=100%>
+<table style="border: transparent;" width="100%">
   <tr><td style="border: none;">
 Custom integration for Home Assistant to fetch real-time energy data from the Cozify HAN (HAN/P1 meter).
 
@@ -28,9 +28,11 @@ Custom integration for Home Assistant to fetch real-time energy data from the Co
    
 </td><td style="border: none;"><img src="images/Cozify_HAN_Sensors.png" width="200"></td></tr>
 <tr><td width=2>
+  
 ## Electricity Price Tracking (Example)
 
 You can use the `sensor.cozify_han_power_total` sensor created by the integration to calculate the electricity price in real time. We recommend using the **Riemann sum integral** sensor to convert the instantaneous price (c/h) into cumulative consumption (c), which you can track with **Utility Meter** on a daily, weekly, and monthly basis.
+
 </td></tr>
 <tr><td style="border: none;">
     
