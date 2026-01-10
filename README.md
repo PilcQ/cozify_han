@@ -30,6 +30,10 @@ Custom integration for Home Assistant to fetch real-time energy data from the Co
 
 You can use the `sensor.cozify_han_power_total` sensor created by the integration to calculate the electricity price in real time. We recommend using the **Riemann sum integral** sensor to convert the instantaneous price (c/h) into cumulative consumption (c), which you can track with **Utility Meter** on a daily, weekly, and monthly basis.
 
+## Automation - Blueprints
+* Download via Home AUtomation Settings - Automation & scenes - Blueprints - Import Blueprint - "Enter the following address"
+* Blueprint base for automation that warns when any phase exceeds the specified current limit. https://github.com/PilcQ/cozify_han/blob/main/blueprints/overcurrent_notification.yaml
+* Blueprint base for automation that warns when any phase exceeds the specified power limit. https://github.com/PilcQ/cozify_han/blob/main/blueprints/total_power_notification.yaml
 </td><td style="border: none;" width="250"><img src="https://github.com/PilcQ/cozify_han/blob/main/images/Cozify_HAN_Sensors.png" width="200"></td></tr>
   
 <tr style="border: none;"><td style="border: none;">
@@ -61,11 +65,6 @@ Cozify HAN is a domestic, key-flag product that brings real-time data from the e
 ## Installation and commissioning
 * Self-installation; placed next to the electricity meter and attached with e.g. double-sided tape
 * If the meter is in a metal cabinet, an Ethernet connection or an external RP-SMA antenna is recommended to ensure a reliable connection
-
-## Automation - Blueprints
-* Download via Home AUtomation Settings - Automation & scenes - Blueprints - Import Blueprint - "Enter the following address"
-* Blueprint base for automation that warns when any phase exceeds the specified current limit. https://github.com/PilcQ/cozify_han/blob/main/blueprints/overcurrent_notification.yaml
-* Blueprint base for automation that warns when any phase exceeds the specified power limit. https://github.com/PilcQ/cozify_han/blob/main/blueprints/total_power_notification.yaml
-  
+ 
 ## Development and Support
 This is a community-driven integration. If you find any bugs or want to improve it further, please create an "Issue" on GitHub.
