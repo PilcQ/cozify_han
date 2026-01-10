@@ -60,6 +60,3 @@ Cozify HAN is a domestic, key-flag product that brings real-time data from the e
   
 ## Development and Support
 This is a community-driven integration. If you find any bugs or want to improve it further, please create an "Issue" on GitHub.
-
----
-*Huom: Tämä integraatio ei ole Cozify Oy:n virallinen tuote.*
