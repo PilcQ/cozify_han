@@ -3,6 +3,10 @@
 Custom integration for Home Assistant to fetch real-time energy data from the Cozify HAN (HAN/P1 meter).
 ![Cozify HAN Sensors](images/Cozify_HAN_Sensors.png)
 
+<p align="right">
+  <img src="images/Cozify_HAN_Sensors.png" width="100">
+</p>
+
 ## Features
 - **Real-time Power:** Total and phase-specific (L1, L2, L3) power consumption.
 - **Voltage & Current:** Per-phase monitoring.
