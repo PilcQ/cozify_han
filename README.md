@@ -10,74 +10,56 @@ Custom integration for Home Assistant to fetch real-time energy data from the Co
 
 ## Installation
 
-### Via HACS (Recommended)
-1. Search for `Cozify HAN` in HACS.
-2. Click **Download**.
-3. Restart Home Assistant.
-4. Go to **Settings** -> **Devices & Services** -> **Add Integration** and search for "Cozify HAN".
+### Via HACS (Custom Repository)
+1. Open Home Assistant and go to HACS -> Integrations.
+2. Click the three dots in the upper right corner and select Custom repositories.
+3. Add the address of this repository: https://github.com/pilcq/cozify_han
+4. Select Integration as the category and click Add.
+5. Find "Cozify HAN" in the list and click Download.
+6. Restart Home Assistant.
 
-# Cozify HAN asennus Home Assistant:iin
+### Step 2: Enable integration
+1. Go to Settings -> Devices and services.
+2. Click Add integration.
+3. Search for "Cozify HAN".
+4. Enter the IP address of your device (e.g. 192.168.1.10) and click Submit.
 
-Tämä integraatio tuo Cozify HAN -lukijan sähkömittaustiedot suoraan Home Assistantiin paikallisverkon yli. Se hakee tiedot suoraan Cozify HAN laitteen REST-rajapinnasta, mikä tekee siitä nopean ja luotettavan.
+## Electricity Price Tracking (Example)
 
-## Ominaisuudet
-* **Reaaliaikainen seuranta:** Päivitysväli oletuksena 10 sekuntia, muutettavissa käyttöliittymästä 5-60s.
-* **Kokonaiskulutus:** Sähköenergian osto (Import) ja myynti (Export) kWh. Myyntiä voi yleensä olla jos on esimerkiksi aurinkopaneeleja.
-* **Vaihekohtaiset tiedot:** Teho (W), Jännite (V), Virta (A) ja Loisteho (VAr) jokaiselle vaiheelle (L1, L2, L3).
-* **Helppo asennus:** Täysi Config Flow -tuki (Cozify HAN laitteen IP:n asetus suoraan käyttöliittymästä).
-
-## Asennus
-
-### Vaihe 1: HACS (Custom Repository)
-1. Avaa Home Assistant ja mene **HACS** -> **Integrations**.
-2. Klikkaa kolmea pistettä oikeassa yläkulmassa ja valitse **Custom repositories**.
-3. Lisää tämän repositorion osoite: `https://github.com/pilcq/cozify_han`
-4. Valitse kategoriaksi **Integration** ja klikkaa **Add**.
-5. Etsi "Cozify HAN" listalta ja klikkaa **Download**.
-6. **Käynnistä Home Assistant uudelleen.**
-
-### Vaihe 2: Integraation käyttöönotto
-1. Mene **Asetukset** -> **Laitteet ja palvelut**.
-2. Klikkaa **Lisää integraatio**.
-3. Etsi "Cozify HAN".
-4. Syötä laitteesi **IP-osoite** (esim. `192.168.1.10`) ja klikkaa Lähetä.
-
-## Sähkön hinnan seuranta (Esimerkki)
-
-Voit käyttää integraation luomaa `sensor.cozify_han_power_total` -sensoria laskemaan sähkön hintaa reaaliajassa. Suosittelemme käyttämään **Riemann sum integral** -sensoria muuttamaan hetkellinen hinta (c/h) kumulatiiviseksi kulutukseksi (c), jota voit seurata **Utility Meterin** avulla päivä-, viikko- ja kuukausitasolla.
+You can use the `sensor.cozify_han_power_total` sensor created by the integration to calculate the electricity price in real time. We recommend using the **Riemann sum integral** sensor to convert the instantaneous price (c/h) into cumulative consumption (c), which you can track with **Utility Meter** on a daily, weekly, and monthly basis.
 
 # Cozify HAN
-Cozify HAN on kotimainen, avainlipputuote, joka tuo sähkömittarin HAN/P1-rajapinnan tiedot reaaliaikaisesti paikallisverkkoon, pilveen ja älyjärjestelmiin. Se on suunniteltu erityisesti pohjoisiin olosuhteisiin, helppoon itseasennukseen ja laajaan integraatioon (RestAPI, MQTT ja Modbus) energiankäytön optimointia, kuormanhallintaa ja automaatiota varten.
+Cozify HAN is a domestic, key-flag product that brings real-time data from the electricity meter's HAN/P1 interface to the local network, cloud and smart systems. It is designed specifically for northern conditions, easy self-installation and extensive integration (RestAPI, MQTT and Modbus) for energy optimization, load management and automation.
 
-## Keskeiset ominaisuudet
-* Reaaliaikainen mittausdata: hetkellinen teho (W/kW), jännite (V), virta (A) ja kumulatiiviset kulutusluvut (kWh) vaihekohtaisesti, kaikki data mitä HAN/P1 väylästä tulee
-* Tukee Ethernet (RJ45)‑yhteyttä ja WiFi‑yhteyttä; mahdollisuus vaihtaa alkuperäinen antenni RP‑SMA‑ulkoinen antenniin parempaa kantamaa varten
-* Sisäänrakennettu HTTP OpenAPI‑palvelin (/meter), MQTT‑lähetys ja Modbus (TCP)‑rajapinnat B2B‑integraatioihin
-* Toimii Android- ja iOS‑sovelluksen kanssa, OTA‑firmware‑päivitykset takaavat jatkokehityksen ja tietoturvan
-* Suunniteltu toimimaan pohjoismaisissa olosuhteissa –40 °C … +60 °C ja samalla IP‑luokituksella kuin sähkömittari
+## Key features
+* Real-time measurement data: instantaneous power (W/kW), voltage (V), current (A) and cumulative consumption figures (kWh) per phase, all data coming from the HAN/P1 bus
+* Supports Ethernet (RJ45) and WiFi connection; possibility to replace the original antenna with an RP-SMA external antenna for better range
+* Built-in HTTP OpenAPI server (/meter), MQTT broadcast and Modbus (TCP) interfaces for B2B integrations
+* Works with Android and iOS applications, OTA firmware updates ensure further development and security
+* Designed to operate in Nordic conditions –40 °C … +60 °C and with the same IP rating as the electricity meter
 
-## Mitä laite tarjoaa käyttäjälle
-* Täsmällinen reaaliaikainen näkyvyys sähkönkulutukseen ja tuotantoon
-* Vaihekohtaisten kuormitusnäkymien avulla helppo tunnistaa ylikuormitusriskit ja tasata kuormia
-* Parempi mahdollisuus hyödyntää tunti- ja varttihintaa sekä reaaliaikaista ohjausta älykkäässä latauksessa ja lämmityksessä
-* Integroituu olemassa oleviin kotiautomaatioalustoihin (esim. Home Assistant) ja energianhallintajärjestelmiin (EVCC.io jne.). Rajapintojen Modbus (TCP), MQTT ja RestAPI kautta integrointimmahdollisuudet ovat rajattomat. Lisää rajapintoja tulevaisuudessa.
+## What the device offers to the user
+* Accurate real-time visibility into electricity consumption and production
+* Phase-specific load views make it easy to identify overload risks and balance loads
+* Better opportunity to utilize hourly and quarter-hourly prices and real-time control in smart charging and heating
+* Integrates with existing home automation platforms (e.g. Home Assistant) and energy management systems (EVCC.io, etc.). Integration possibilities are limitless via Modbus (TCP), MQTT and RestAPI interfaces. More interfaces in the future.
 
-## Tekniset tiedot
-* Liitännät: RJ12 (HAN/P1), RJ45 (Ethernet), WiFi , USB‑C (lisävirta),  RP-SMA (WiFi lisäantenni)
-* Rajapinnat: OpenAPI (HTTP, /meter), MQTT (JSON‑payload), Modbus TCP (rekisterit)
-* Käyttöympäristö: −40 °C … +60 °C; kotelo ja liitännät sähkömittariluokan mukaiset
+## Technical data
+* Connections: RJ12 (HAN/P1), RJ45 (Ethernet), WiFi , USB‑C (additional power), RP-SMA (additional WiFi antenna)
+* Interfaces: OpenAPI (HTTP, /meter), MQTT (JSON‑payload), Modbus TCP (registers)
+* Operating environment: −40 °C … +60 °C; housing and connections according to electricity meter class
 
-## Asennus ja käyttöönotto
-* Itseasennettava; sijoitetaan sähkömittarin viereen ja kiinnitetään esim. kaksipuolisella teipillä
-* Jos mittari on metallisessa kaapissa, suositellaan Ethernet‑yhteyttä tai ulkoista RP‑SMA‑antennia luotettavan yhteyden varmistamiseksi
+## Installation and commissioning
+* Self-installation; placed next to the electricity meter and attached with e.g. double-sided tape
+* If the meter is in a metal cabinet, an Ethernet connection or an external RP-SMA antenna is recommended to ensure a reliable connection
 
-## Automaatio - Blueprints
-* Lataa Home AUtomation järjestlemän kautta Settings - Automation & scenes - Blueprints - Import Blueprint - "Syötä oheinen osoite"
-* Blueprint pohja automaatiolle, joka varoittaa minkä tahansa vaiheen ylittäessä määritetty virtaraja. https://github.com/PilcQ/cozify_han/blob/main/blueprints/overcurrent_notification.yaml
-* Blueprint pohja automaatiolle, joka varoittaa minkä tahansa vaiheen ylittäessä määritetty tehorajan. https://github.com/PilcQ/cozify_han/blob/main/blueprints/total_power_notification.yaml
+## Automation - Blueprints
+* Download via Home AUtomation Settings - Automation & scenes - Blueprints - Import Blueprint - "Enter the following address"
+* Blueprint base for automation that warns when any phase exceeds the specified current limit. https://github.com/PilcQ/cozify_han/blob/main/blueprints/overcurrent_notification.yaml
+* Blueprint base for automation that warns when any phase exceeds the specified power limit. https://github.com/PilcQ/cozify_han/blob/main/blueprints/total_power_notification.yaml
   
-## Kehitys ja tuki
-Tämä on yhteisöpohjainen integraatio. Jos huomaat virheitä tai haluat kehittää sitä eteenpäin, luo "Issue" tai "Pull Request" GitHubissa.
+## Development and Support
+This is a community-driven integration. If you find any bugs or want to improve it further, please create an "Issue" on GitHub.
 
 ---
 *Huom: Tämä integraatio ei ole Cozify Oy:n virallinen tuote.*
