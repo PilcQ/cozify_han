@@ -27,7 +27,7 @@ Custom integration for Home Assistant to fetch real-time energy data from the Co
 4. Enter the IP address of your device (e.g. 192.168.1.10) and click Submit.
    
 </td><td style="border: none;"><img src="images/Cozify_HAN_Sensors.png" width="200"></td></tr>
-<tr><td width=2>
+<tr><td colspan=2>
   
 ## Electricity Price Tracking (Example)
 
