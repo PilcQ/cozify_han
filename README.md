@@ -54,9 +54,6 @@ Cozify HAN is a domestic, key-flag product that brings real-time data from the e
 * Better opportunity to utilize hourly and quarter-hourly prices and real-time control in smart charging and heating
 * Integrates with existing home automation platforms (e.g. Home Assistant) and energy management systems (EVCC.io, etc.). Integration possibilities are limitless via Modbus (TCP), MQTT and RestAPI interfaces. More interfaces in the future.
   
-</td><td style="border: none;"><img src="https://github.com/PilcQ/cozify_han/blob/main/images/Cozify_HAN_Diagnostics.png" width="200"></td></tr>
-</table>
-
 ## Technical data
 * Connections: RJ12 (HAN/P1), RJ45 (Ethernet), WiFi , USB‑C (additional power), RP-SMA (additional WiFi antenna)
 * Interfaces: OpenAPI (HTTP, /meter), MQTT (JSON‑payload), Modbus TCP (registers)
@@ -65,6 +62,9 @@ Cozify HAN is a domestic, key-flag product that brings real-time data from the e
 ## Installation and commissioning
 * Self-installation; placed next to the electricity meter and attached with e.g. double-sided tape
 * If the meter is in a metal cabinet, an Ethernet connection or an external RP-SMA antenna is recommended to ensure a reliable connection
- 
+
+</td><td style="border: none;"><img src="https://github.com/PilcQ/cozify_han/blob/main/images/Cozify_HAN_Diagnostics.png" width="200"></td></tr>
+</table>
+
 ## Development and Support
 This is a community-driven integration. If you find any bugs or want to improve it further, please create an "Issue" on GitHub.
