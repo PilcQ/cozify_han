@@ -1,7 +1,7 @@
 # Cozify HAN for Home Assistant
 
-<table style="border: transparent;" width=100%>
-  <tr><td style="border: none;">
+<table style="border: none; border-collapse: collapse;" width=100%>
+  <tr style="border: none;"><td style="border: none;">
 Custom integration for Home Assistant to fetch real-time energy data from the Cozify HAN (HAN/P1 meter).
 
 ## Features
@@ -27,14 +27,14 @@ Custom integration for Home Assistant to fetch real-time energy data from the Co
 4. Enter the IP address of your device (e.g. 192.168.1.10) and click Submit.
    
 </td><td style="border: none;"><img src="images/Cozify_HAN_Sensors.png" width="200"></td></tr>
-<tr><td colspan=2>
+<tr style="border: none;"><td style="border: none;" colspan=2>
   
 ## Electricity Price Tracking (Example)
 
 You can use the `sensor.cozify_han_power_total` sensor created by the integration to calculate the electricity price in real time. We recommend using the **Riemann sum integral** sensor to convert the instantaneous price (c/h) into cumulative consumption (c), which you can track with **Utility Meter** on a daily, weekly, and monthly basis.
 
 </td></tr>
-<tr><td style="border: none;">
+<tr style="border: none;"><td style="border: none;">
     
 # Cozify HAN
 Cozify HAN is a domestic, key-flag product that brings real-time data from the electricity meter's HAN/P1 interface to the local network, cloud and smart systems. It is designed specifically for northern conditions, easy self-installation and extensive integration (RestAPI, MQTT and Modbus) for energy optimization, load management and automation.
