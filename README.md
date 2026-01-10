@@ -1,5 +1,5 @@
 # Cozify HAN for Home Assistant
-<table border="0">
+<table border="0" cellspacing="0">
   <tr><td>
 Custom integration for Home Assistant to fetch real-time energy data from the Cozify HAN (HAN/P1 meter).
 
