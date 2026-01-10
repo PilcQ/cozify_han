@@ -52,7 +52,7 @@ Cozify HAN is a domestic, key-flag product that brings real-time data from the e
 * Better opportunity to utilize hourly and quarter-hourly prices and real-time control in smart charging and heating
 * Integrates with existing home automation platforms (e.g. Home Assistant) and energy management systems (EVCC.io, etc.). Integration possibilities are limitless via Modbus (TCP), MQTT and RestAPI interfaces. More interfaces in the future.
   
-</td><td style="border: none;"><img src="images/Cozify_HAN_Diagnostics.png" width="200"></td></tr>
+</td><td style="border: none;"><img src="https://github.com/PilcQ/cozify_han/blob/main/images/Cozify_HAN_Diagnostics.png" width="200"></td></tr>
 </table>
 
 ## Technical data
