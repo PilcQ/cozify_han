@@ -1,6 +1,6 @@
 # Cozify HAN for Home Assistant
 <table style="border: transparent;">
-  <tr><td>
+  <tr><td style="border: none;">
 Custom integration for Home Assistant to fetch real-time energy data from the Cozify HAN (HAN/P1 meter).
 
 ## Features
@@ -25,7 +25,7 @@ Custom integration for Home Assistant to fetch real-time energy data from the Co
 3. Search for "Cozify HAN".
 4. Enter the IP address of your device (e.g. 192.168.1.10) and click Submit.
    
-</td><td><img src="images/Cozify_HAN_Sensors.png" width="200"></td></tr>
+</td><td style="border: none;"><img src="images/Cozify_HAN_Sensors.png" width="200"></td></tr>
 </table>
 
 ## Electricity Price Tracking (Example)
