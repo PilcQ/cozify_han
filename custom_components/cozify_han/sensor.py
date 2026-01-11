@@ -116,6 +116,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
         CozifyHANConfigSensor(coordinator, entry, "wifi_mode", "WiFi Mode", None, "mdi:wifi-cog", EntityCategory.DIAGNOSTIC, device_info_init),
         CozifyHANConfigSensor(coordinator, entry, "wifi_channel", "WiFi Channel", None, "mdi:wifi-star", EntityCategory.DIAGNOSTIC, device_info_init),
         CozifyHANConfigSensor(coordinator, entry, "wifi_beacon", "WiFi Beacon Active", None, "mdi:broadcast", EntityCategory.DIAGNOSTIC, device_info_init),
+        CozifyHANConfigSensor(coordinator, entry, "channel", "Update Channel", None, "mdi:package-variant", EntityCategory.DIAGNOSTIC, device_info_init),
+        CozifyHANConfigSensor(coordinator, entry, "wifiIp", "WiFi IP Address", None, "mdi:wifi", EntityCategory.DIAGNOSTIC, device_info_init),
+        CozifyHANConfigSensor(coordinator, entry, "ethIp", "Ethernet IP Address", None, "mdi:lan", EntityCategory.DIAGNOSTIC, device_info_init),
         
         # --- LASKENNALLISET MAKSIMIT ---
         CozifyMaxCurrentSensor(coordinator, entry, "Current Max L1", 0, device_info_init),
@@ -261,15 +264,13 @@ class CozifyHANConfigSensor(CozifyBaseEntity, SensorEntity):
         
         # Luetaan status-lohkosta (/han endpoint)
         status_data = self.coordinator.data.get("status", {})
-        
-        if self._key == "online":
-            # Haetaan "online" avain suoraan status-datasta
-            is_online = status_data.get("online")
-            if is_online is True:
-                return "Online"
-            if is_online is False:
-                return "Offline"
-            return "Unknown"
+
+# Tarkistetaan onko kyseessä jokin suoraan /han haarasta tuleva tieto
+        if self._key in ["online", "channel", "wifiIp", "ethIp"]:
+            val = status_data.get(self._key)
+            if self._key == "online":
+                return "Online" if val is True else "Offline"
+            return val
         
         c = self.coordinator.data.get("config", {})
         if self._key == "price": return float(c.get("p", 0))
