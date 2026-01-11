@@ -107,7 +107,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         CozifyHANConfigSensor(coordinator, entry, "v", "Firmware Version", None, "mdi:git", EntityCategory.DIAGNOSTIC, device_info_init),
         CozifyHANConfigSensor(coordinator, entry, "price", "Fixed Electricity Price", "c/kWh", "mdi:cash", EntityCategory.DIAGNOSTIC, device_info_init),
         CozifyHANConfigSensor(coordinator, entry, "timezone", "Timezone", None, "mdi:clock-outline", EntityCategory.DIAGNOSTIC, device_info_init),
-        CozifyHANConfigSensor(coordinator, entry, "online", "Cloud Connection Status", None, "mdi:cloud-check", EntityCategory.DIAGNOSTIC, device_info_init),
+        CozifyHANConfigSensor(coordinator, entry, "online", "Cloud Connection", None, "mdi:cloud-check", EntityCategory.DIAGNOSTIC, device_info_init),
         CozifyHANConfigSensor(coordinator, entry, "fuse", "Main Fuse Size", "A", "mdi:fuse", EntityCategory.DIAGNOSTIC, device_info_init),
         CozifyHANConfigSensor(coordinator, entry, "eth_active", "Ethernet Active", None, "mdi:lan", EntityCategory.DIAGNOSTIC, device_info_init),
         CozifyHANConfigSensor(coordinator, entry, "eth_mode", "Ethernet Mode", None, "mdi:lan-check", EntityCategory.DIAGNOSTIC, device_info_init),
